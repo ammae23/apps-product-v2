@@ -1,50 +1,110 @@
-# React + TypeScript + Vite
+## APPS Product 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+### Install Node.Js & Depedency
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+sudo yum update -y
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | /bin/bash
+sudo yum install -y npm git
+sudo npm install bootstrap
+sudo npm add axios
+sudo npm install react-router-dom
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Clone Repository
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+```
+cd ~
+git clone https://github.com/bmx22/apps-product-v2
+cd apps-product-v2
+```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+
+### Install & Running React apps
+
+```
+npm install 
+npm run build 
+npm run dev 
+```
+
+
+### Setup React Apps running on backend
+
+#### Create systemd
+
+```
+sudo nano /lib/systemd/system/product.service
+```
+
+Add code bellow :
+
+```
+[Unit]
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/home/ec2-user/apps-product-v2
+ExecStart=/usr/bin/node /home/ec2-user/apps-product-v2/server.js
+Restart=always
+StandardOutput=append:/var/log/product.log
+StandardError=append:/var/log/product.log
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+#### Restart services
+
+```
+sudo systemctl daemon-reload
+sudo systemctl start product
+sudo systemctl enable product
+sudo systemctl status product
+```
+
+### Install Nginx
+```
+sudo yum update -y
+sudo yum install -y nginx
+```
+
+### Setup nginx for reverse proxy
+
+
+```
+sudo mkdir /etc/nginx/sites-available
+sudo mkdir /etc/nginx/sites-enabled
+sudo nano /etc/nginx/sites-available/apps-product.conf
+
+server {
+    listen 80;
+    server_name YOUR_ALB_DNS;  # Sesuaikan dengan domain Load Balancer kamu
+
+    location / {
+        root /home/ec2-user/apps-product-v2/build; # Path ke build React
+        index index.html;
+        try_files $uri /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://localhost:5000/; # Jika ada backend di port 5000, sesuaikan
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+```
+
+```
+sudo unlink /etc/nginx/sites-enabled/default
+sudo ln -s /etc/nginx/sites-available/ apps-product.conf /etc/nginx/sites-enabled/product-apps.conf
+sudo systemctl restart nginx
+sudo systemctl status nginx
 ```
