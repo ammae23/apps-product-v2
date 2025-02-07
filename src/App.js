@@ -8,6 +8,7 @@ import HeaderComponent from './components/HeaderComponent';
 import FooterComponent from './components/FooterComponent';
 import CreateProductComponent from './components/CreateProductComponent';
 import ViewProductComponent from './components/ViewProductComponent';
+import HealthCheck from './HealthCheck';
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
                         <Route path = "/products" component = {ListProductComponent}></Route>
                         <Route path = "/add-product/:id" component = {CreateProductComponent}></Route>
                         <Route path = "/view-product/:id" component = {ViewProductComponent}></Route>
+                        <Route path='/health-check' component={HealthCheck} />
                           {/* <Route path = "/update-product/:id" component = {UpdateProductComponent}></Route> */}
                     </Switch>
                 </div>
