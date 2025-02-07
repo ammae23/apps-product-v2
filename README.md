@@ -16,7 +16,7 @@ sudo npm install react-router-dom
 
 ```
 cd ~
-git clone https://github.com/bmx22/apps-product-v2
+[git clone https://github.com/ammae23/apps-product-v2]
 cd apps-product-v2
 ```
 
